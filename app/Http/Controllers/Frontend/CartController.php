@@ -88,10 +88,9 @@ class CartController extends Controller
     /**
      * View Cart Page
      *
-     * @param \Illuminate\Http\Request $isPackage
      * @return \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
      */
-    public function cartDetails(Request $isPackage): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
+    public function cartDetails(): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
     {
         $cart_items = Cart::content();
 
@@ -104,7 +103,7 @@ class CartController extends Controller
         $cart_page_banner_section = json_decode($cart_page_banner_section?->value);
 
         return view('frontend.pages.cart-detail',
-            compact('cart_items', 'cart_page_banner_section', 'isPackage'));
+            compact('cart_items', 'cart_page_banner_section'));
     }
 
     /**
@@ -115,7 +114,10 @@ class CartController extends Controller
      */
     function updateProductQty(Request $request): Application|Response|\Illuminate\Contracts\Foundation\Application|ResponseFactory
     {
-        $product_id = Cart::get($request->rowId)->id;
+        $rowId = $request->input('rowId');
+        $quantity = $request->input('quantity');
+
+        $product_id = Cart::get($rowId)->id;
 
         $product = Product::query()->findOrFail($product_id);
 
@@ -124,16 +126,16 @@ class CartController extends Controller
                 'status' => 'error',
                 'message' => 'Product Out of Stock.'
             ]);
-        } elseif ($product->quantity < $request->quantity) {
+        } elseif ($product->quantity < $quantity) {
             return response([
                 'status' => 'error',
                 'message' => 'Product Short of Stock.'
             ]);
         }
 
-        Cart::update($request->rowId, $request->quantity);
+        Cart::update($rowId, $quantity);
 
-        $product_total = $this->getProductTotal($request->rowId);
+        $product_total = $this->getProductTotal($rowId);
 
         return response([
             'status' => 'success',
@@ -152,7 +154,10 @@ class CartController extends Controller
     {
         $product = Cart::get($row_id);
 
-        return ($product->price + $product->options->variant_price_total) * $product->qty;
+        $variant_price_total = property_exists($product->options, 'variant_price_total')
+            ? $product->options->variant_price_total : 0;
+
+        return ($product->price + $variant_price_total) * $product->qty;
     }
 
     /**
@@ -229,7 +234,7 @@ class CartController extends Controller
      */
     public function removeSidebarProduct(Request $request): Application|Response|\Illuminate\Contracts\Foundation\Application|ResponseFactory
     {
-        Cart::remove($request->rowId);
+        Cart::remove($request->input('rowId'));
 
         return response([
             'status' => 'success',
@@ -245,10 +250,12 @@ class CartController extends Controller
      */
     public function applyCoupon(Request $request): Application|Response|\Illuminate\Contracts\Foundation\Application|ResponseFactory
     {
+        $coupon_code = $request->input('coupon');
+
         // Check if session coupon is set and its code matches the current coupon code
         if (Session::has('coupon')) {
             $sessionCoupon = Session::get('coupon');
-            if ($sessionCoupon['code'] === $request->coupon) {
+            if ($sessionCoupon['code'] === $coupon_code) {
                 return response([
                     'status' => 'error',
                     'message' => 'Coupon already applied.'
@@ -256,7 +263,7 @@ class CartController extends Controller
             }
         }
 
-        if ($request->coupon === null) {
+        if ($coupon_code === null) {
             return response([
                 'status' => 'error',
                 'message' => 'Enter coupon.'
@@ -264,7 +271,7 @@ class CartController extends Controller
         }
 
         $coupon = Coupon::query()->where([
-            'code' => $request->coupon,
+            'code' => $coupon_code,
             'status' => 1
         ])->first();
 
