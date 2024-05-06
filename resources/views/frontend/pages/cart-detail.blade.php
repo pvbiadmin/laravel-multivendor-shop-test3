@@ -128,13 +128,7 @@
                         </div>
                     </div>
                     @php
-                        $cart_package = [];
-
-                        if ( session()->has('cart') && isset(session('cart')['default']) ) {
-                            foreach ( session('cart')['default'] as $key => $val ) {
-                                $cart_package[] = $val;
-                            }
-                        }
+                        $cart_package = cartPackage();
                     @endphp
                     <div class="col-xl-3">
                         <div class="wsus__cart_list_footer_button" id="sticky_sidebar">
@@ -153,14 +147,14 @@
                                            placeholder="Referral Code" aria-label="coupon">
                                     <button type="submit" class="common_btn">apply</button>
                                 </form>
-                            @else
-                                <form id="coupon_form">
-                                    <input type="text" name="coupon" value="{{ session()->has('coupon')
-                                    ? session('coupon')['code'] : '' }}"
-                                           placeholder="Coupon Code" aria-label="coupon">
-                                    <button type="submit" class="common_btn">apply</button>
-                                </form>
                             @endif
+                            <form id="coupon_form">
+                                <input type="text" name="coupon" value="{{ session()->has('coupon')
+                                    ? session('coupon')['code'] : '' }}"
+                                       placeholder="{{ session()->has('coupon')
+                                        ? session('coupon')['code'] : 'Coupon Code' }}" aria-label="coupon">
+                                <button type="submit" class="common_btn">apply</button>
+                            </form>
                             <a class="common_btn mt-4 w-100 text-center"
                                href="{{ route('user.checkout') }}">checkout</a>
                             <a class="common_btn mt-1 w-100 text-center"

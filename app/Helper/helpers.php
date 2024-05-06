@@ -986,6 +986,26 @@ function cartTotal(): mixed
 }
 
 /**
+ * Retrieves package in the cart
+ *
+ * @return array
+ */
+function cartPackage(): array
+{
+    $cart_package = [];
+
+    if ( session()->has('cart') && isset(session('cart')['default']) ) {
+        foreach (session('cart')['default'] as $val ) {
+            if ($val->options->is_package == 1) {
+                $cart_package[] = $val;
+            }
+        }
+    }
+
+    return $cart_package;
+}
+
+/**
  * Coupon Discount
  *
  * @return mixed

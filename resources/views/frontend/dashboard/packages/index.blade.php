@@ -12,13 +12,7 @@
             @include( 'frontend.dashboard.layouts.sidebar' )
 
             @php
-                $cart_package = [];
-
-                if ( session()->has('cart') && isset(session('cart')['default']) ) {
-                    foreach ( session('cart')['default'] as $key => $val ) {
-                        $cart_package[] = $val;
-                    }
-                }
+                $cart_package = cartPackage();
             @endphp
 
             <div class="row">

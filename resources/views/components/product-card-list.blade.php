@@ -72,14 +72,9 @@
                 </p>
             @endif
             <p class="list_description">{!! $product->short_description !!}</p>
-            @php
-                $cart_package = [];
 
-                if ( session()->has('cart') && isset(session('cart')['default']) ) {
-                    foreach ( session('cart')['default'] as $key => $val ) {
-                        $cart_package[] = $val;
-                    }
-                }
+            @php
+                $cart_package = cartPackage();
             @endphp
 
             <ul class="wsus__single_pro_icon">
