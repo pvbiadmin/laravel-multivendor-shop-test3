@@ -58,7 +58,7 @@ Route::get('change-product-detail-tab-view', [ProductController::class, 'changeP
  * Cart Routes
  */
 Route::post('add-to-cart', [CartController::class, 'addToCart'])->name('add-to-cart');
-Route::get('cart-details/{isPackage}', [CartController::class, 'cartDetails'])->name('cart-details');
+Route::get('cart-details', [CartController::class, 'cartDetails'])->name('cart-details');
 Route::post('cart/update-quantity', [CartController::class, 'updateProductQty'])
     ->name('cart.update-quantity');
 Route::get('clear-cart', [CartController::class, 'clearCart'])->name('clear-cart');

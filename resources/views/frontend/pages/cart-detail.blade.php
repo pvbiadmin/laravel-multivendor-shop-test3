@@ -4,8 +4,6 @@
     {{ $settings->site_name }} || Cart Details
 @endsection
 
-@dump( $isPackage )
-
 @section( 'content' )
     <!--============================
         BREADCRUMB START
@@ -59,10 +57,6 @@
                                             total
                                         </th>
 
-                                        {{--<th class="wsus__pro_status">
-                                            status
-                                        </th>--}}
-
                                         <th class="wsus__pro_select">
                                             quantity
                                         </th>
@@ -93,10 +87,6 @@
                                                 @endif
                                             </td>
 
-                                            {{--<td class="wsus__pro_status">
-                                                <p>in stock</p>
-                                            </td>--}}
-
                                             <td class="wsus__pro_tk">
                                                 <h6>{{ $settings->currency_icon .
                                                     number_format($item->price, 2) }}</h6>
@@ -112,12 +102,17 @@
 
                                             <td class="wsus__pro_select">
                                                 <div class="product_qty_wrapper">
-                                                    <button class="decrement-cart-qty less-cart-qty">-</button>
-                                                    <input class="product-qty cart-qty" name="quantity" type="text"
-                                                           min="1" max="10" value="{{ $item->qty }}"
-                                                           data-row-id="{{ $item->rowId }}"
-                                                           aria-label="quantity" readonly/>
-                                                    <button class="increment-cart-qty plus-cart-qty">+</button>
+                                                    @if ( $item->options->is_package
+                                                        && $item->options->is_package == 1 )
+                                                        {{ $item->qty }}
+                                                    @else
+                                                        <button class="decrement-cart-qty less-cart-qty">-</button>
+                                                        <input class="product-qty cart-qty" name="quantity"
+                                                               type="text" min="1" max="10" value="{{ $item->qty }}"
+                                                               data-row-id="{{ $item->rowId }}"
+                                                               aria-label="quantity" readonly/>
+                                                        <button class="increment-cart-qty plus-cart-qty">+</button>
+                                                    @endif
                                                 </div>
                                             </td>
 
@@ -132,22 +127,40 @@
                             </div>
                         </div>
                     </div>
+                    @php
+                        $cart_package = [];
+
+                        if ( session()->has('cart') && isset(session('cart')['default']) ) {
+                            foreach ( session('cart')['default'] as $key => $val ) {
+                                $cart_package[] = $val;
+                            }
+                        }
+                    @endphp
                     <div class="col-xl-3">
                         <div class="wsus__cart_list_footer_button" id="sticky_sidebar">
                             <h6>total cart</h6>
                             <p>subtotal: <span id="cart-detail-subtotal">{{ $settings->currency_icon .
                                 number_format(cartSubtotal(), 2) }}</span></p>
-                            <p>coupon(-): <span id="coupon-discount">{{ $settings->currency_icon .
-                                number_format(couponDiscount(), 2) }}</span></p>
+                            @if ( !( $cart_package && $cart_package[0]->options->is_package == 1 ) )
+                                <p>coupon(-): <span id="coupon-discount">{{ $settings->currency_icon .
+                                    number_format(couponDiscount(), 2) }}</span></p>
+                            @endif
                             <p class="total"><span>total:</span> <span id="cart-total">{{ $settings->currency_icon .
                                 number_format(cartTotal(), 2) }}</span></p>
-
-                            <form id="coupon_form">
-                                <input type="text" name="coupon" value="{{ session()->has('coupon')
-                                    ? session()->get('coupon')['code'] : '' }}"
-                                       placeholder="Coupon Code" aria-label="coupon">
-                                <button type="submit" class="common_btn">apply</button>
-                            </form>
+                            @if ( $cart_package && $cart_package[0]->options->is_package == 1 )
+                                <form id="coupon_form">
+                                    <input type="text" name="referral_code"
+                                           placeholder="Referral Code" aria-label="coupon">
+                                    <button type="submit" class="common_btn">apply</button>
+                                </form>
+                            @else
+                                <form id="coupon_form">
+                                    <input type="text" name="coupon" value="{{ session()->has('coupon')
+                                    ? session('coupon')['code'] : '' }}"
+                                           placeholder="Coupon Code" aria-label="coupon">
+                                    <button type="submit" class="common_btn">apply</button>
+                                </form>
+                            @endif
                             <a class="common_btn mt-4 w-100 text-center"
                                href="{{ route('user.checkout') }}">checkout</a>
                             <a class="common_btn mt-1 w-100 text-center"

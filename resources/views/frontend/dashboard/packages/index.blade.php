@@ -11,16 +11,25 @@
 
             @include( 'frontend.dashboard.layouts.sidebar' )
 
+            @php
+                $cart_package = [];
+
+                if ( session()->has('cart') && isset(session('cart')['default']) ) {
+                    foreach ( session('cart')['default'] as $key => $val ) {
+                        $cart_package[] = $val;
+                    }
+                }
+            @endphp
+
             <div class="row">
                 <div class="col-xl-9 col-xxl-10 col-lg-9 ms-auto">
                     <div class="dashboard_content mt-2 mt-md-0">
                         <h3><i class="far fa-box" aria-hidden="true"></i> Packages</h3>
-                        @if ( session()->has('cart') && count(session('cart')) > 0 )
-                            <div class="create_button">
-                                <a href="{{ route('cart-details', 1) }}" class="btn btn-primary">
-                                    <i class="fas fa-shopping-cart" aria-hidden="true"></i> View Cart</a>
-                            </div>
-                        @endif
+                        <div class="create_button view_cart_package {{ $cart_package
+                            && $cart_package[0]->options->is_package == 1 ? '' : 'd-none' }}">
+                            <a href="{{ route('cart-details') }}" class="btn btn-primary">
+                                <i class="fas fa-shopping-cart" aria-hidden="true"></i> View Cart</a>
+                        </div>
                         <div class="wsus__dashboard_review">
                             <div class="row">
                                 @if ( count($packages) > 0 )

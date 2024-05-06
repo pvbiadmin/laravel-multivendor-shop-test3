@@ -119,6 +119,8 @@
                                 getCartCount();
                                 getSidebarCartItems();
                                 $(".mini-cart-actions").removeClass("d-none");
+                                $(".view_cart_package").removeClass("d-none");
+                                $(".cart-form").addClass("d-none");
                                 toastr.success(res.message);
                             } else if (res.status === "error") {
                                 toastr.error(res.message);
@@ -171,7 +173,6 @@
 
                                 const priceFormatted = formatFloat(price);
                                 const variantPriceTotalFormatted = formatFloat(variant_price_total);
-
 
                                 html += `<li id="mini-cart-${rowId}">
                                             <div class="wsus__cart_img">

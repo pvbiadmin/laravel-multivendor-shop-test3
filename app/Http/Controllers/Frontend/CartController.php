@@ -28,14 +28,19 @@ class CartController extends Controller
      */
     public function addToCart(Request $request): Application|Response|\Illuminate\Contracts\Foundation\Application|ResponseFactory
     {
-        $product = Product::query()->findOrFail($request->product_id);
+        $product_id = $request->input('product_id');
+        $quantity = $request->input('quantity');
+        $variant_options = $request->input('variant_options');
+        $is_package = $request->input('is_package');
+
+        $product = Product::query()->findOrFail($product_id);
 
         if ($product->quantity === 0) {
             return response([
                 'status' => 'error',
                 'message' => 'Product Out of Stock.'
             ]);
-        } elseif ($product->quantity < $request->quantity) {
+        } elseif ($product->quantity < $quantity) {
             return response([
                 'status' => 'error',
                 'message' => 'Product Short of Stock.'
@@ -47,7 +52,7 @@ class CartController extends Controller
         $variant_price_total = 0;
 
         if ($request->has('variant_options')) {
-            foreach ($request->variant_options as $option_id) {
+            foreach ($variant_options as $option_id) {
                 $variant_option = ProductVariantOption::query()->find($option_id);
 
                 $variants[$variant_option->productVariant->name]['name'] = $variant_option->name;
@@ -63,13 +68,14 @@ class CartController extends Controller
 
         $cart_data['id'] = $product->id;
         $cart_data['name'] = $product->name;
-        $cart_data['qty'] = $request->quantity;
+        $cart_data['qty'] = $quantity;
         $cart_data['price'] = $product_price;
         $cart_data['weight'] = 10;
         $cart_data['options']['variants'] = $variants;
         $cart_data['options']['variant_price_total'] = $variant_price_total;
         $cart_data['options']['image'] = $product->thumb_image;
         $cart_data['options']['slug'] = $product->slug;
+        $cart_data['options']['is_package'] = $is_package;
 
         Cart::add($cart_data);
 

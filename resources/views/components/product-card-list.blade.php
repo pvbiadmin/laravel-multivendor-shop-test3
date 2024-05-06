@@ -72,12 +72,25 @@
                 </p>
             @endif
             <p class="list_description">{!! $product->short_description !!}</p>
+            @php
+                $cart_package = [];
+
+                if ( session()->has('cart') && isset(session('cart')['default']) ) {
+                    foreach ( session('cart')['default'] as $key => $val ) {
+                        $cart_package[] = $val;
+                    }
+                }
+            @endphp
+
             <ul class="wsus__single_pro_icon">
                 <li>
-                    @if ( session()->has('cart') && count(session('cart')) > 0 && $section === 'package' ) @else
+                    @if ( $cart_package && $cart_package[0]->options->is_package == 1 ) @else
                         <form class="cart-form">
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             <input type="hidden" name="quantity" value="1"/>
+                            @if ( $section === 'package' )
+                                <input type="hidden" name="is_package" value="1"/>
+                            @endif
                             @foreach ( $product->variants as $variant )
                                 @if ( $variant->status != 0 )
                                     <select id="variant_{{ $variant->id }}" class="d-none" name="variant_options[]"

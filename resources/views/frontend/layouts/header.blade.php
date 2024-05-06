@@ -92,7 +92,7 @@
             <h5>Subtotal <span id="mini-cart-subtotal">{{
                 $settings->currency_icon . number_format(cartSubtotal(), 2) }}</span></h5>
             <div class="wsus__minicart_btn_area">
-                <a class="common_btn" href="{{ route('cart-details', 0) }}">view cart</a>
+                <a class="common_btn" href="{{ route('cart-details') }}">view cart</a>
                 <a class="common_btn" href="{{ route('user.checkout') }}">checkout</a>
             </div>
         </div>
